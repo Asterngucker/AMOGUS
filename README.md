@@ -1,2 +1,1 @@
-# amogus
-sus
+# Amateur Model Of Gravitating Universe Simulation
