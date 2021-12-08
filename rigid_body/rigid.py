@@ -1,4 +1,3 @@
-import pygame as pg
 import math
 
 class Rigid_body:
@@ -91,12 +90,3 @@ class Rigid_body:
             part.x = body.x + part.x_local*cos_alph - part.y_local*sin_alph
             part.y = body.y + part.x_local*sin_alph + part.y_local*cos_alph
         body.vy-= g*dt
-    
-    def draw_body(body, surf):
-        for part in body.part:
-            pg.draw.line (surf, (0, 200, 200), (part.x, part.y), (body.x, body.y))
-        for part in body.part:
-            pg.draw.circle(surf, (200, 200, 200), (part.x, part.y), part.r, 1)
-        for part in body.part:
-            pg.draw.circle(surf, part.color, (part.x, part.y), part.r - 1)
-           

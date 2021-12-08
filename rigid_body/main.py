@@ -4,31 +4,16 @@ from time import time_ns as nanosec
 import pygame as pg
 import pygame.freetype as ft
 import math
+from view import *
 from btn import *
 from rigid import *
 from tree import *
-
-def draw_root (root, screen):
-    if root.light:# or True:
-        if len(root.gas)!=0:
-            pg.draw.rect (screen, (40, 130, 200), (root.x-root.r, root.y-root.r, 2*root.r, 2*root.r))
-        pg.draw.rect (screen, (200, 200, 200), (root.x-root.r, root.y-root.r, 2*root.r, 2*root.r), 1)
-        if root.child_lu is not None:
-            root.child_lu.draw_root(screen)
-        if root.child_ru is not None:
-            root.child_ru.draw_root(screen)
-        if root.child_rd is not None:
-            root.child_rd.draw_root(screen)
-        if root.child_ld is not None:
-            root.child_ld.draw_root(screen)
-
-Tree_root.draw_root = draw_root
 
 # константы
 max_fps = 40
 WIDTH = 1600
 HIGHT = 800
-g = -40
+g = 40
 f_forward = 0.50
 # инициализация визуализации
 pg.init()
@@ -43,10 +28,10 @@ gas = set()
 n = 80
 part_set = set()
 for i in range(n):
-    part_set.add( Rigid_body.Part_circle(m=1/n, r=20, color=(20, 130, 20), x=WIDTH/2 + 250*math.sin(2*math.pi * i/n),  y=HIGHT/2 - 2000 + 100*math.cos(2*math.pi * i/n)) )
-part_set.add( Rigid_body.Part_circle(m=20,  r=40, color=(20, 130, 20), x=WIDTH/2-60, y=HIGHT/2 + 100 - 2000) )
-part_set.add( Rigid_body.Part_circle(m=90,  r=60, color=(20, 130, 20), x=WIDTH/2,    y=HIGHT/2 + 120 - 2000) )
-part_set.add( Rigid_body.Part_circle(m=20,  r=40, color=(20, 130, 20), x=WIDTH/2+60, y=HIGHT/2 + 100 - 2000) )
+    part_set.add( Rigid_body.Part_circle(m=1/n, r=20, color=(20, 130, 20), x=WIDTH/2 + 250*math.sin(2*math.pi * i/n),  y=HIGHT/2 + 5000 + 100*math.cos(2*math.pi * i/n)) )
+part_set.add( Rigid_body.Part_circle(m=20,  r=40, color=(20, 130, 20), x=WIDTH/2-60, y=HIGHT/2 + 100 + 5000) )
+part_set.add( Rigid_body.Part_circle(m=90,  r=60, color=(20, 130, 20), x=WIDTH/2,    y=HIGHT/2 + 120 + 5000) )
+part_set.add( Rigid_body.Part_circle(m=20,  r=40, color=(20, 130, 20), x=WIDTH/2+60, y=HIGHT/2 + 100 + 5000) )
 gas.add( Rigid_body(part_set, vx=0, vy=0, omeg=0) )
 part_set = set()
 
@@ -64,11 +49,11 @@ for body in gas:
     for part in body.part:
         tree.add_elem(part.x, part.y, part.r, part)
 
-bound_r = 20000
+bound_r = 2000
 part_set = set()
-#part_set.add( Rigid_body.Part_circle(m=1E7, r=bound_r, color=(50, 50, 140), x=WIDTH/2, y=-bound_r) )
+part_set.add( Rigid_body.Part_circle(m=1E7, r=bound_r, color=(50, 50, 140), x=WIDTH/2, y=-bound_r) )
 part_set.add( Rigid_body.Part_circle(m=1E7, r=bound_r, color=(50, 50, 140), x=WIDTH+bound_r, y=HIGHT/2) )
-part_set.add( Rigid_body.Part_circle(m=1E7, r=bound_r, color=(50, 50, 140), x=WIDTH/2, y=HIGHT+bound_r) )
+#part_set.add( Rigid_body.Part_circle(m=1E7, r=bound_r, color=(50, 50, 140), x=WIDTH/2, y=HIGHT+bound_r) )
 part_set.add( Rigid_body.Part_circle(m=1E7, r=bound_r, color=(50, 50, 140), x=-bound_r, y=HIGHT/2) )
 bound = Rigid_body(part_set, vx=0, vy=0, omeg=0)
 
@@ -78,6 +63,7 @@ for part in bound.part:
 btn_1 = Button(550, HIGHT+50, 150, 100)
 btn_spinc = Button(800, HIGHT+50, 50, 50)
 btn_spdec = Button(750, HIGHT+50, 50, 50)
+btn_screen = Button(0, 0, WIDTH, HIGHT)
 # осн цикл
 '''
 av_len = 1000
@@ -92,6 +78,8 @@ av_sum = 0
 fps = 0
 itr = 0
 dt = 0
+x_screen_0, y_screen_0, scale = 0, 1000, 1
+screen_drag = False
 while not finished:
     if btn_spinc.state:
         f_forward += 0.05
@@ -119,10 +107,10 @@ while not finished:
     t1 = nanosec()
     
     if btn_1.state:
-        tree.root.draw_root(screen)
-    bound.draw_body(screen)
+        draw_root(tree.root, screen, x_screen_0, y_screen_0, scale)
+    draw_body(bound, screen, x_screen_0, y_screen_0, scale)
     for body in gas:
-        body.draw_body(screen)
+        draw_body(body, screen, x_screen_0, y_screen_0, scale)
     
     font.render_to(screen, (10, HIGHT+50*0), "fps:      {0:6.2f}   itr:{1:4d}".format(fps, itr), (232, 98, 129), (0, 0, 0, 0))
     font.render_to(screen, (10, HIGHT+50*1), "dt_coll:{0:5d}".format( (t1-t0)//1000000 ), (232, 98, 129), (0, 0, 0, 0))
@@ -143,7 +131,26 @@ while not finished:
             btn_1.click(event.pos[0], event.pos[1])
             btn_spinc.click(event.pos[0], event.pos[1])
             btn_spdec.click(event.pos[0], event.pos[1])
-            
+            btn_screen.click(event.pos[0], event.pos[1])
+            if btn_screen.state and event.button == 1:
+                screen_drag = True
+            if btn_screen.state or True:
+                if event.button == 4:
+                    scale_new = scale*1.1
+                    x_screen_0, y_screen_0 = scale_at_point (event.pos[0], event.pos[1], scale_new, x_screen_0, y_screen_0, scale)
+                    scale = scale_new
+                if event.button == 5:
+                    scale_new = scale*0.9
+                    x_screen_0, y_screen_0 = scale_at_point (event.pos[0], event.pos[1], scale_new, x_screen_0, y_screen_0, scale)
+                    scale = scale_new
+            btn_screen.state = False
+        elif event.type == pg.MOUSEBUTTONUP:
+            if event.button == 1:
+                screen_drag = False
+        elif event.type == pg.MOUSEMOTION:
+            if screen_drag:
+                x_screen_0, y_screen_0 = drag_screen (event.rel[0], event.rel[1], x_screen_0, y_screen_0, scale)
+    
     dt = clock.tick(max_fps)/1000
     fps = clock.get_fps()
     itr+=1
