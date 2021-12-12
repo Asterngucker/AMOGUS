@@ -16,6 +16,16 @@ class Tree_root:                           #вершина дерева Square_t
         light_is = True
         while root is not None and (light_was != light_is):
             light_was = root.light
+            '''  #обрезание пустых вершин
+            if root.child_lu is not None and not root.child_lu.light:
+                root.child_lu = None
+            if root.child_ru is not None and not root.child_ru.light:
+                root.child_ru = None
+            if root.child_rd is not None and not root.child_rd.light:
+                root.child_rd = None
+            if root.child_ld is not None and not root.child_ld.light:
+                root.child_ld = None
+            '''
             root.light = (len(root.gas)!=0) or (root.child_lu is not None and root.child_lu.light) or (root.child_ru is not None and root.child_ru.light) or (root.child_rd is not None and root.child_rd.light) or (root.child_ld is not None and root.child_ld.light)
             light_is = root.light
             root = root.parent
@@ -77,7 +87,32 @@ class Tree_root:                           #вершина дерева Square_t
             root.child_rd.get_intersect(intersect, gas_this_and_above)
         if root.child_ld is not None and root.child_ld.light:
             root.child_ld.get_intersect(intersect, gas_this_and_above)
-
+    
+    def trunc_empty (root):  #убирает поддеревья в которых нету элементов
+        if root.child_lu is not None: 
+            if not root.child_lu.light:
+                root.child_lu = None
+            else:
+                root.child_lu.trunc_empty()
+        
+        if root.child_ru is not None: 
+            if not root.child_ru.light:
+                root.child_ru = None
+            else:
+                root.child_ru.trunc_empty()
+        
+        if root.child_rd is not None: 
+            if not root.child_rd.light:
+                root.child_rd = None
+            else:
+                root.child_rd.trunc_empty()
+        
+        if root.child_ld is not None: 
+            if not root.child_ld.light:
+                root.child_ld = None
+            else:
+                root.child_ld.trunc_empty()
+    
 class Square_tree: #класс предоставляет интерфейс для поиска потенциально пересекающихся обьектов, вписанных в квадрат, называемый box.
     def __init__ (tree, x=1.0, y=1.0, r=1.0):
         tree.cover = dict()
@@ -100,11 +135,11 @@ class Square_tree: #класс предоставляет интерфейс д�
         lca.make_cover(box_x, box_y, box_r, elem, new_cover)
         old_cover = tree.cover[elem]
         #обноввление множеств покрываемых элементов в вершинах дерева.
-        for root in old_cover - new_cover:
-            root.gas.remove(elem)
-            root.upd_light_up()
         for root in new_cover - old_cover:
             root.gas.add(elem)
+            root.upd_light_up()
+        for root in old_cover - new_cover:
+            root.gas.remove(elem)
             root.upd_light_up()
         
         tree.cover[elem] = new_cover
@@ -121,3 +156,5 @@ class Square_tree: #класс предоставляет интерфейс д�
         tree.root.get_intersect(intersect, gas_above)
         return intersect
     
+    def trunc_empty(tree): #обрезание пустых веток дерева
+        tree.root.trunc_empty()
