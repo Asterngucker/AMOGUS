@@ -39,7 +39,7 @@ class Frame:
         else:
             return 1/frame.scale*(frame.cos_alph*(pos[0]-frame.x_0) + frame.sin_alph*(pos[1]-frame.y_0)), 1/frame.scale*(-frame.sin_alph*(pos[0]-frame.x_0) + frame.cos_alph*(pos[1]-frame.y_0))
     
-    def drag (frame, delta_pos): #для перетаскивания курсором. delta_pos - изменение положения курсора в экранных коор-ах или привязки к объекту.
+    def drag (frame, delta_pos): #для перетаскивания курсором. delta_pos - изменение положения курсора в экранных коор-ах.
         frame.x_0 += delta_pos[0]
         frame.y_0 += delta_pos[1]
     
@@ -47,4 +47,9 @@ class Frame:
         frame.x_0 += (1 - factor) * (pos[0] - frame.x_0)
         frame.y_0 += (1 - factor) * (pos[1] - frame.y_0)
         frame.scale *= factor
-        
+    
+    def rotate_around(frame, pos, alph): #поворот вокруг экранной точки pos на alph радиан
+        frame.alph = frame._alph + alph
+        cos_alph = cos(alph)
+        sin_alph = sin(alph)
+        frame.x_0, frame.y_0 = pos[0] - (cos_alph*(pos[0]-frame.x_0) - sin_alph*(pos[1]-frame.y_0)), pos[1] - (sin_alph*(pos[0]-frame.x_0) + cos_alph*(pos[1]-frame.y_0))

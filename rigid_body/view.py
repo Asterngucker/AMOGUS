@@ -1,39 +1,20 @@
-from scale import *
+from frame import *
 import pygame as pg
 
-def coor_to_screen(x, y, x_screen_0, y_screen_0, scale):
-    return round(x_screen_0+scale*x), round(y_screen_0-scale*y)
-'''
-def coor_to_model(x, y, x_screen_0, y_screen_0, scale):
-    return (x_screen_0+scale*x), (y_screen_0-scale*y)
-'''
-def drag_screen (delta_x_screen, delta_y_screen, x_screen_0, y_screen_0, scale):
-    return x_screen_0 + delta_x_screen, y_screen_0 + delta_y_screen
-
-def scale_at_point (x_screen, y_screen, scale_new, x_screen_0, y_screen_0, scale):
-    return x_screen_0 + (1 - scale_new/scale) * (x_screen-x_screen_0), y_screen_0 + (1 - scale_new/scale) * (y_screen-y_screen_0)
-
-def draw_root (root, screen, x_screen_0, y_screen_0, scale):
-    if root.light or True:
-        root_x_screen, root_y_screen = coor_to_screen(root.x, root.y, x_screen_0, y_screen_0, scale)
-        root_r_screen  = root.r * scale
-        if len(root.gas)!=0:
-            pg.draw.rect (screen, (40, 130, 200), (root_x_screen-root_r_screen, root_y_screen-root_r_screen, 2*root_r_screen, 2*root_r_screen))
-        pg.draw.rect (screen, (200, 200, 200), (root_x_screen-root_r_screen, root_y_screen-root_r_screen, 2*root_r_screen, 2*root_r_screen), 1)
-        if root.child_lu is not None:
-            draw_root(root.child_lu, screen, x_screen_0, y_screen_0, scale)
-        if root.child_ru is not None:
-            draw_root(root.child_ru, screen, x_screen_0, y_screen_0, scale)
-        if root.child_rd is not None:
-            draw_root(root.child_rd, screen, x_screen_0, y_screen_0, scale)
-        if root.child_ld is not None:
-            draw_root(root.child_ld, screen, x_screen_0, y_screen_0, scale)
-
-def draw_body(body, surf, frame):
-    for part in body.part:
-        pg.draw.line (surf, (0, 200, 200), frame.direct( (part.x, part.y) ), frame.direct( (body.x, body.y) ))
-    for part in body.part:
-        pg.draw.circle(surf, (200, 200, 200), frame.direct( (part.x, part.y) ), round(part.r * frame.scale), 1)
-    for part in body.part:
-        pg.draw.circle(surf, part.color, frame.direct( (part.x, part.y) ), round(part.r * frame.scale - 1))
+def draw_bodies(bodies, surf, frame):
+    for body in bodies:
+        for part in body.part:
+            pg.draw.line (surf, "0x00D0D0", frame.direct((part.x, part.y)), frame.direct((body.x, body.y)) )
+            pg.draw.circle (surf, "0xD0D0D0", frame.direct((part.x, part.y)), round(part.r * frame.scale), 1)
+    for body in bodies:
+        for part in body.part:
+            pg.draw.circle(surf, part.color, frame.direct((part.x, part.y)), round(part.r * frame.scale - 1))
+    for body in bodies:
+        body_screen_x, body_screen_y = frame.direct((body.x, body.y))
+        icon_size = 10
+        if icon_size != 0:
+            pg.draw.lines (surf, "0x00D0D0", True, [(body_screen_x, body_screen_y + icon_size), (body_screen_x + icon_size, body_screen_y), (body_screen_x, body_screen_y - icon_size), (body_screen_x - icon_size, body_screen_y)])
+            #if body.name != "":
+            #    pg.draw.lines (surf, "0x00D0D0", False, [(body_screen_x + icon_size/2, body_screen_y + icon_size/2), (body_screen_x + icon_size*2, body_screen_y + icon_size*2), (body_screen_x + icon_size*(6+2*len(body.name)), body_screen_y + icon_size*2)])
             
+

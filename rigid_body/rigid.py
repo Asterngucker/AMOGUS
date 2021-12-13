@@ -14,7 +14,7 @@ class Rigid_body:
             part.y_local = 0
             part.body = None
     
-    def __init__ (body, part_set, vx=0, vy=0, omeg=0):
+    def __init__ (body, part_set, vx=0, vy=0, omeg=0, name=""):
         body.vx = vx
         body.vy = vy
         body.omeg = omeg
@@ -40,6 +40,7 @@ class Rigid_body:
             part.body = body
             part.x_local = part.x - body.x
             part.y_local = part.y - body.y
+        body.name = name
     
     def add_part (body, part):
         pass
