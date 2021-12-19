@@ -40,7 +40,7 @@ class Game_state:
         pg.quit()
         
 
-def menu_loop(game): #описывает цикл главного меню игры
+def menu_loop(game, BACK): #описывает цикл главного меню игры
     #загрузка спрайтов
     button_start_sprite = pg.image.load("sprites/button_start.png").convert()
     #Инициализация кнопок
@@ -68,30 +68,38 @@ def menu_loop(game): #описывает цикл главного меню иг
         
         if button_start.input:
             game.state = Game_state.SANDBOX
+            sandbox_loop(game, Game_state.MENU)
+            button_start.input = False
         if button_settings.input:
             game.state = Game_state.SETTINGS
+            settings_loop(game, Game_state.MENU)
+            button_settings.input = False
         if button_help.input:
             game.state = Game_state.HELP
+            help_loop(game, Game_state.MENU)
+            button_help.input = False
         
         game.clock.tick(game.MAX_FPS)
         fps = game.clock.get_fps()
 
-def sandbox_loop(game):
+
+
+def sandbox_loop(game, BACK):
     view_screen = pg.Surface( (1200, 700) )
     #загрузка спрайтов
     
     #Инициализация кнопок
-    button_menu     = Button (( 10, 10), ( 40, 40))
+    button_back     = Button (( 10, 10), ( 40, 40))
     button_settings = Button (( 50, 10), ( 40, 40))
     button_help     = Button (( 90, 10), ( 40, 40))
     button_saves    = Button ((150, 10), (100, 40))
-    buttons = {button_menu, button_settings, button_help, button_saves}
+    buttons = {button_back, button_settings, button_help, button_saves}
     wheels = {}
     while game.state == Game_state.SANDBOX:
         #model
         
         #view
-        button_menu.draw(game.screen)
+        button_back.draw(game.screen)
         button_settings.draw(game.screen)
         button_help.draw(game.screen)
         button_saves.draw(game.screen)
@@ -108,30 +116,37 @@ def sandbox_loop(game):
             if event.type == pg.QUIT:
                 game.state = Game_state.FINISHED
         
-        if button_menu.input:
-            game.state = Game_state.MENU
+        if button_back.input:
+            game.state = BACK
         if button_settings.input:
             game.state = Game_state.SETTINGS
             settings_loop (game, Game_state.SANDBOX)
+            button_settings.input = False
         if button_help.input:
             game.state = Game_state.HELP
-            help_loop (game, HELP)
+            help_loop (game, Game_state.SANDBOX)
+            button_help.input = False
+        if button_saves.input:
+            game.state = Game_state.SAVES
+            saves_loop (game, Game_state.SANDBOX)
+            button_saves.input = False
         
         game.clock.tick(game.MAX_FPS)
         fps = game.clock.get_fps()
 
-def saves_loop(game):
+def saves_loop(game, BACK):
+    print(BACK)
     #загрузка спрайтов
     
     #Инициализация кнопок
-    button_menu = Button 
-    buttons = {}
+    button_back = Button (( 10, 10), ( 40, 40))
+    buttons = {button_back}
     wheels = {}
-    while game.state == Game_state.SAVE_MENU:
+    while game.state == Game_state.SAVES:
         #model
         
         #view
-        
+        button_back.draw(game.screen)
         pg.display.update()
         game.screen.fill("0x000000")
         
@@ -142,6 +157,9 @@ def saves_loop(game):
         for event in events:
             if event.type == pg.QUIT:
                 game.state = Game_state.FINISHED
+        
+        if button_back.input:
+            game.state = BACK
         
         game.clock.tick(game.MAX_FPS)
         fps = game.clock.get_fps()
@@ -150,13 +168,14 @@ def help_loop(game, BACK):
     #загрузка спрайтов
     
     #Инициализация кнопок
-    button_menu = Button 
-    buttons = {}
+    button_back = Button ((10, 10), (40, 40))
+    buttons = {button_back}
     wheels = {}
     while game.state == Game_state.HELP:
         #model
         
         #view
+        button_back.draw(game.screen)
         
         pg.display.update()
         game.screen.fill("0x000000")
@@ -168,6 +187,9 @@ def help_loop(game, BACK):
         for event in events:
             if event.type == pg.QUIT:
                 game.state = Game_state.FINISHED
+        
+        if button_back.input:
+            game.state = BACK
         
         game.clock.tick(game.MAX_FPS)
         fps = game.clock.get_fps()
@@ -176,13 +198,14 @@ def settings_loop(game, BACK):
     #загрузка спрайтов
     
     #Инициализация кнопок
-    button_menu = Button 
-    buttons = {}
+    button_back = Button ((10, 10), (40, 40))
+    buttons = {button_back}
     wheels = {}
     while game.state == Game_state.SETTINGS:
         #model
         
         #view
+        button_back.draw(game.screen)
         
         pg.display.update()
         game.screen.fill("0x000000")
@@ -195,5 +218,11 @@ def settings_loop(game, BACK):
             if event.type == pg.QUIT:
                 game.state = Game_state.FINISHED
         
+        if button_back.input:
+            game.state = BACK
+            
         game.clock.tick(game.MAX_FPS)
         fps = game.clock.get_fps()
+
+if __name__ == "__main__":
+    print("This module is NOT for direct call!")
