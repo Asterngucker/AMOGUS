@@ -16,16 +16,6 @@ class Tree_root:                           #вершина дерева Square_t
         light_is = True
         while root is not None and (light_was != light_is):
             light_was = root.light
-            '''  #обрезание пустых вершин
-            if root.child_lu is not None and not root.child_lu.light:
-                root.child_lu = None
-            if root.child_ru is not None and not root.child_ru.light:
-                root.child_ru = None
-            if root.child_rd is not None and not root.child_rd.light:
-                root.child_rd = None
-            if root.child_ld is not None and not root.child_ld.light:
-                root.child_ld = None
-            '''
             root.light = (len(root.gas)!=0) or (root.child_lu is not None and root.child_lu.light) or (root.child_ru is not None and root.child_ru.light) or (root.child_rd is not None and root.child_rd.light) or (root.child_ld is not None and root.child_ld.light)
             light_is = root.light
             root = root.parent

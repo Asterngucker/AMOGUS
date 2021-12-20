@@ -20,6 +20,10 @@ class Frame:
     @property
     def alph(frame):
         return frame._alph
+        
+    @alph.getter
+    def alph(frame, alph):
+        return frame._alph
     
     @alph.setter
     def alph(frame, alph):
@@ -37,7 +41,7 @@ class Frame:
         if not frame.flip_y:
             return 1/frame.scale*(frame.cos_alph*(pos[0]-frame.x_0) + frame.sin_alph*(pos[1]-frame.y_0)), 1/frame.scale*(-frame.sin_alph*(pos[0]-frame.x_0) + frame.cos_alph*(pos[1]-frame.y_0))
         else:
-            return 1/frame.scale*(frame.cos_alph*(pos[0]-frame.x_0) + frame.sin_alph*(pos[1]-frame.y_0)), 1/frame.scale*(-frame.sin_alph*(pos[0]-frame.x_0) + frame.cos_alph*(pos[1]-frame.y_0))
+            return 1/frame.scale*(frame.cos_alph*(pos[0]-frame.x_0) + frame.sin_alph*(pos[1]-frame.y_0)), 1/frame.scale*( frame.sin_alph*(pos[0]-frame.x_0) - frame.cos_alph*(pos[1]-frame.y_0))
     
     def drag (frame, delta_pos): #для перетаскивания курсором. delta_pos - изменение положения курсора в экранных коор-ах.
         frame.x_0 += delta_pos[0]

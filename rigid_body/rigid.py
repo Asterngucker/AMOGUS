@@ -14,7 +14,7 @@ class Rigid_body:
             part.y_local = 0
             part.body = None
     
-    def __init__ (body, part_set, vx=0, vy=0, omeg=0, name=""):
+    def __init__ (body, part_set, vx=0, vy=0, omeg=0):
         body.vx = vx
         body.vy = vy
         body.omeg = omeg
@@ -40,18 +40,15 @@ class Rigid_body:
             part.body = body
             part.x_local = part.x - body.x
             part.y_local = part.y - body.y
-        body.name = name
     
-    def add_part (body, part):
-        pass
-    
-    def del_part (body, part):
-        pass
+    def copy (body):
+        new_part_set = set()
+        for part in body.part:
+            new_part_set.add( Rigid_body.Part_circle(m=part.m, r=part.r, color=part.color, x=part.x, y=part.y) )
+        new_body = Rigid_body(new_part_set, vx=body.vx, vy=body.vy, omeg=body.omeg)
+        return new_body
     
     def merge_body (body_1, body_2):
-        pass
-    
-    def split_body (body_1, body_2):
         pass
     
     def calc_coll(part_1, part_2):

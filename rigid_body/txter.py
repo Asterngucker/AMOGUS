@@ -48,7 +48,7 @@ def file_to_bodies(filename):
                         y      = float(divided[4])
                         part_set.add( Rigid_body.Part_circle(m=m, r=r, color=color, x=x, y=y) )
                     else:
-                        body = Rigid_body(part_set, vx=vx, vy=vy, omeg=omeg, name=name)
+                        body = Rigid_body(part_set, vx=vx, vy=vy, omeg=omeg)
                         if subset == "m":
                             massive_bodies.add(body)
                         elif subset == "l":
@@ -71,11 +71,12 @@ def bodies_to_file(filename, massive_bodies, light_bodies):
             if body in massive_bodies:
                 subset = "m"
             else:
-                subset = "l"
-            f.write(body.name + "\n")
+                subset = "l" 
             f.write("{0:s} {1:+20.15E} {2:+20.15E} {3:+20.15E} \n".format(subset, body.vx, body.vy, body.omeg))
             f.write("{\n")
             for part in body.part:
+                if not isinstance(part.color, str):  
+                    part.color = hex(part.color[0] + 256*part.color[1] + 65536*part.color[2])
                 f.write("{0:+20.15E} {1:+20.15E} {2:s} {3:+20.15E} {4:+20.15E}\n".format(part.m, part.r, part.color, part.x, part.y))
             f.write("}\n")
             f.write("\n")

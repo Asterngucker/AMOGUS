@@ -1,118 +1,199 @@
 import pygame as pg
 from math import *
 
+# В этом модуле описаны объекты для ввода информации со стороны игрока - кнопка, колёсико и (FIXME окно ввода текста)
+
 class Button:
+    def __init__ (button, pos, size, sprite_0 = None, sprite_1 = None, nosprite = False):
+        button.pos        = pos
+        button.size       = size
+        if not nosprite:
+            button.sprite_0 = sprite_0 if sprite_0 is not None else Button.get_whitebox_0(size)
+            button.sprite_1 = sprite_1 if sprite_1 is not None else Button.get_whitebox_1(size)
+        button.input      = False
+        button.input_prev = False
+        button.nosprite   = nosprite
+    
 	#белые коробки - спрайты по умолчанию
-    pg.init()
-    whitebox_0 = pg.Surface((200, 200))
-    pg.draw.line(whitebox_0, (200, 200, 200), (0, 0), (199, 0))
-    pg.draw.line(whitebox_0, (200, 200, 200), (199, 0), (199, 199))
-    pg.draw.line(whitebox_0, (200, 200, 200), (199, 199), (0, 199))
-    pg.draw.line(whitebox_0, (200, 200, 200), (0, 199), (0, 0))
-    whitebox_1 = whitebox_0.copy()
-    pg.draw.line(whitebox_1, (200, 200, 200), (0, 0), (199, 199))
-    pg.draw.line(whitebox_1, (200, 200, 200), (199, 0), (0, 199))
+    @staticmethod
+    def get_whitebox_0(size):
+        whitebox_0 = pg.Surface(size)
+        whitebox_0.set_colorkey("0x000000")
+        pg.draw.lines(whitebox_0, "0xD0D0D0", True,  [(0, 0), (size[0]-1, 0), (size[0]-1, size[1]-1), (0, size[1]-1)] )
+        return whitebox_0
     
-    def __init__ (self, x, y, w, h, sprite_0 = whitebox_0, sprite_1 = whitebox_1, state = False):
-        self.x = x
-        self.y = y
-        self.w = w
-        self.h = h
-        self.sprite_0 = sprite_0
-        self.sprite_1 = sprite_1
-        self.state = state
+    @staticmethod
+    def get_whitebox_1(size):
+        whitebox_1 = Button.get_whitebox_0(size)
+        pg.draw.line(whitebox_1, "0xD0D0D0", (0, 0), (size[0]-1, size[1]-1))
+        pg.draw.line(whitebox_1, "0xD0D0D0", (size[0]-1, 0), (0, size[1]-1))
+        return whitebox_1
     
-    def click (self, x_click, y_click):
+    def click (button, click_pos):
     	#меняет состояние при попадании по кнопке
-        if (self.x < x_click) and (self.x + self.w > x_click) and (self.y < y_click) and (self.y + self.h > y_click):
-            self.state = not self.state
+        if (button.pos[0] < click_pos[0]) and (button.pos[0] + button.size[0] > click_pos[0]) and (button.pos[1] < click_pos[1]) and (button.pos[1] + button.size[1] > click_pos[1]):
+            button.input = not button.input
     
-    def draw (self, surface):
-    	#в зависимости от состояния рисует нужный спрайт
-        if self.state:
-            if (self.w, self.h) != self.sprite_1.get_size():
-                self.sprite_1 = pg.transform.smoothscale(self.sprite_1, (self.w, self.h))
-            surface.blit(self.sprite_1, (self.x, self.y))
-        else:
-            if (self.w, self.h) != self.sprite_0.get_size():
-                self.sprite_0 = pg.transform.smoothscale(self.sprite_0, (self.w, self.h)) 
-            surface.blit(self.sprite_0, (self.x, self.y))
+    @staticmethod
+    def event_handler (buttons, events): #Проверяет все кнопки на нажатие.
+        #for button in buttons:
+        #    button.input = 0
+        for event in events:
+            if event.type == pg.MOUSEBUTTONDOWN and event.button == 1:
+                for button in buttons:
+                    button.click(event.pos)
+    
+    def draw (button, surface):
+        if not button.nosprite:
+            if button.input:
+                if button.size != button.sprite_1.get_size():
+                    button.sprite_1 = pg.transform.smoothscale(button.sprite_1, button.size)
+                surface.blit(button.sprite_1, button.pos)
+            else:
+                if button.size != button.sprite_0.get_size():
+                    button.sprite_0 = pg.transform.smoothscale(button.sprite_0, button.size) 
+                surface.blit(button.sprite_0, button.pos)
+    
+    @staticmethod
+    def draw_all(buttons, surface):
+        for button in buttons:
+            button.draw(surface)
 
 
-class Slider:
+class Wheel:
     '''
     крутилка, на которую можно нажать ЛКМ и потянуть мышкой.
     Вертикальная или горизонтальная, произвольный прямоугольник экранных осей.
-    В slider.offset пишет смещение за кадр. 0 если не нажата.
-    slider.offset_tot - суммирующееся смещение.
+    В wheel.input пишет смещение за кадр. 0 если не нажата.
+    wheel.input_tot - суммирующееся смещение.
     '''
-    def __init__(slider, pos, size, axis, offset_tot = 0):
+    def __init__(wheel, pos, size, axis, input_tot = 0, nosprite = False):
         '''
         **pos**  — положение верхнего левого угла
         **size** — размер
         **axis** — ось: 0==x, 1==y
         '''
-        slider.pos         = pos
-        slider.size        = size
-        slider.sprite      = None
-        slider.pressed     = False
-        slider.offset      = 0
-        slider.offset_tot  = offset_tot
-        slider.axis        = axis
-        
-        slider.upd_sprite()  
+        wheel.pos         = pos
+        wheel.size        = size
+        wheel.pressed     = False
+        wheel.input       = 0
+        wheel.input_tot   = input_tot
+        wheel.axis        = axis
+        wheel.nosprite    = nosprite
+        if not nosprite:
+            wheel.sprite  = None
+            wheel.upd_sprite()  
     
-    def click (slider, pos):
-        if slider.pos[0] < pos[0] and slider.pos[0]+slider.size[0] > pos[0] and slider.pos[1] < pos[1] and slider.pos[1]+slider.size[1] > pos[1]:
-            slider.pressed = True
+    def click (wheel, pos):
+        if wheel.pos[0] < pos[0] and wheel.pos[0]+wheel.size[0] > pos[0] and wheel.pos[1] < pos[1] and wheel.pos[1]+wheel.size[1] > pos[1]:
+            wheel.pressed = True
     
-    def drag (slider, rel):
-        if slider.pressed:
-            slider.offset     += rel[slider.axis]
-            slider.offset_tot += rel[slider.axis]
-            slider.upd_sprite()
+    def drag (wheel, rel):
+        if wheel.pressed:
+            wheel.input     += rel[wheel.axis]
+            wheel.input_tot += rel[wheel.axis]
+            if not wheel.nosprite:
+                wheel.upd_sprite()
     
-    def release (slider):
-        if slider.pressed:
-            slider.pressed = False
+    def release (wheel):
+        if wheel.pressed:
+            wheel.pressed = False
     
     @staticmethod
-    def event_handler (sliders, events): # обработчик событий для крутилок. В список sliders стоит добавить все активные крутилки.
-        for slider in sliders:
-            slider.offset = 0
+    def event_handler (wheels, events): #Проверяет все события на всех крутилках. В список wheels стоит добавить все активные крутилки.
+        for wheel in wheels:
+            wheel.input = 0
         for event in events:
             if event.type == pg.MOUSEBUTTONDOWN and event.button == 1:
-                for slider in sliders:
-                    slider.click(event.pos)
+                for wheel in wheels:
+                    wheel.click(event.pos)
             elif event.type == pg.MOUSEMOTION:
-                for slider in sliders:
-                    slider.drag(event.rel)
+                for wheel in wheels:
+                    wheel.drag(event.rel)
             elif event.type == pg.MOUSEBUTTONUP and event.button == 1:
-                for slider in sliders:
-                    slider.release()
+                for wheel in wheels:
+                    wheel.release()
     
-    def upd_sprite (slider): 
-        if slider.axis == 1:
-            size = (slider.size[1], slider.size[0])
+    def upd_sprite (wheel): 
+        if wheel.axis == 1:
+            size = (wheel.size[1], wheel.size[0])
         else:
-            size = slider.size
+            size = wheel.size
         sprite = pg.Surface(size)
         sprite.set_colorkey("0x000000")
         r = size[0]*0.5                                      #радиус колёсика. Отрисовывается вид с ребра.
         alph_interval = 0.15                                 #расстояние между рисками в радианах
-        delta_dash = slider.offset_tot/(r*alph_interval)
-        alph_offset = (delta_dash - round(delta_dash-0.5)) * alph_interval
+        delta_dash = wheel.input_tot/(r*alph_interval)
+        alph_input = (delta_dash - round(delta_dash-0.5)) * alph_interval
         alph_0 = asin(size[0]/(2*r))
-        alph = -alph_0 + alph_offset
+        alph = -alph_0 + alph_input
         while alph < alph_0:
             line_x = size[0]/2 + r*sin(alph)
             pg.draw.line(sprite, "0xD0D0D0", (line_x, 0), (line_x, size[1]))
             alph += alph_interval
         pg.draw.rect(sprite, "0xD0D0D0", (0, 0, size[0], size[1]), 1)
         
-        if slider.axis == 1:
+        if wheel.axis == 1:
             sprite = pg.transform.rotate(sprite, 270)
-        slider.sprite = sprite
+        wheel.sprite = sprite
     
-    def draw(slider, surf):
-        surf.blit(slider.sprite, slider.pos)
+    def draw(wheel, surf):
+        if not wheel.nosprite:
+            surf.blit(wheel.sprite, wheel.pos)
+    
+    @staticmethod
+    def draw_all(wheels, surface):
+        for wheel in wheels:
+            wheel.draw(surface)
+
+class Text:
+    '''
+    
+    '''
+    def __init__(text, pos, size, font, max_len):
+        text.pos     = pos
+        text.size    = size
+        text.font    = font
+        text.pressed = False
+        text.input   = ""
+        text.buffer  = ""
+        text.max_len = max_len
+   
+    def click (text, pos):
+        if text.pos[0] < pos[0] and text.pos[0]+text.size[0] > pos[0] and text.pos[1] < pos[1] and text.pos[1]+text.size[1] > pos[1]:
+            text.pressed = True
+            text.buffer = text.input
+    
+    @staticmethod
+    def event_handler (texts, events):
+        for event in events:
+            for text in texts:
+                if event.type == pg.MOUSEBUTTONDOWN and event.button == 1:
+                    text.click(event.pos)
+                if text.pressed:
+                    if event.type == pg.TEXTINPUT and event.text != pg.K_SPACE and len(text.buffer)<text.max_len:
+                        text.buffer += event.text
+                    elif event.type == pg.KEYDOWN:
+                        if event.key == pg.K_BACKSPACE:
+                            text.buffer = text.buffer[0:len(text.buffer)-1]
+                        elif event.key == pg.K_RETURN:
+                            text.input = text.buffer
+                            text.buffer = ""
+                            text.pressed = False
+                        elif event.key == pg.K_ESCAPE:
+                            text.buffer = ""
+                            text.pressed = False
+    
+    def draw(text, surface):
+        tmp_surf = pg.Surface(text.size)
+        if text.pressed:
+            text.font.render_to(tmp_surf, (0, 0), text.buffer + "_", "0xFFFFFF", (0, 0, 0, 0))
+        else:
+            text.font.render_to(tmp_surf, (0, 0), text.input,  "0xFFFFFF", (0, 0, 0, 0))
+        pg.draw.rect(tmp_surf, "0xFFFFFF", (0, 0, text.size[0], text.size[1]), 1)
+        surface.blit(tmp_surf, text.pos)
+    
+    @staticmethod
+    def draw_all(texts, surface):
+        for text in texts:
+            text.draw(surface)
