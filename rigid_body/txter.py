@@ -1,10 +1,15 @@
-from rigid import *
+"""
+модуль содержит функции для чтения и записи в файл системы тел
 
+функции:
+    file_to_bodies(filename): -> (set, set)
+    bodies_to_file(filename, set, set):
+"""
+from rigid import *
 
 def file_to_bodies(filename):
     """
     создаёт и возвращает множества тел из текстового файла вида:
-    "name"              : имя тела
     l/m vx vy omeg      : лёгкое/массивное, скорость и угловая скорость. Остальные параметры вычисляются из параметров деталей тела. 
     {
     m r color x y       : масса, радиус детали, цвет, положение. Как мимнимум 1 деталь.
@@ -17,18 +22,14 @@ def file_to_bodies(filename):
     massive_bodies = set()
     light_bodies = set()
     
-    NAMING   = 1
-    PARAMS   = 2
+    PARAMS = 2
     OPENNING = 3
-    PARTS    = 4
-    state = NAMING
+    PARTS = 4
+    state = PARAMS
     with open(filename) as f:
         for line in f:
             if len(line.strip()) != 0 and line[0] != '#':
-                if state == NAMING:
-                    name = line[:-1]
-                    state = PARAMS
-                elif state == PARAMS:
+                if state == PARAMS:
                     divided = line.split()
                     subset = divided[0]
                     vx   = float(divided[1])
@@ -53,7 +54,7 @@ def file_to_bodies(filename):
                             massive_bodies.add(body)
                         elif subset == "l":
                             light_bodies.add(body)
-                        state = NAMING
+                        state = PARAMS
                     
     return massive_bodies, light_bodies
 

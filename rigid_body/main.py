@@ -28,7 +28,7 @@ frame = Frame()
 frame.drag((WIDTH/2, HIGHT/2))
 frame.flip_y = True
 # инициализация тел
-massive_bodies, light_bodies = file_to_bodies("systems/" + "system_2.txt")
+massive_bodies, light_bodies = file_to_bodies("saves/" + "system_2.txt")
 all_bodies = massive_bodies | light_bodies
 tree = Square_tree()
 for body in all_bodies:
@@ -115,8 +115,10 @@ while not finished:
     small_font.render_to(screen, (1635, 420), "dir",  "0xA0A0A0", (0, 0, 0, 0))
     small_font.render_to(screen, (1635, 460), "omeg:{0:5.2f}".format(wheel_add_omeg.input_tot*0.01), "0xA0A0A0", (0, 0, 0, 0))
     
+    pg.draw.rect(screen, "0xFFFFFF", (button_screen.pos[0], button_screen.pos[1], button_screen.size[0], button_screen.size[1]), 1)
+    
     pg.display.update()
-    screen.fill((0, 0, 0), (0, 0, WIDTH, HIGHT+200))
+    screen.fill((0, 0, 0))
     
     #получение информации из внешнего мира
     events = pg.event.get()
@@ -179,6 +181,6 @@ while not finished:
     fps = clock.get_fps()
     itr+=1
 
-bodies_to_file ("systems/" + "autosave.txt", massive_bodies, light_bodies)
+bodies_to_file ("saves/" + "autosave.txt", massive_bodies, light_bodies)
 ft.quit()
 pg.quit()

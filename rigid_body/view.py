@@ -1,7 +1,27 @@
 from frame import *
 import pygame as pg
 
+"""
+в этом модуле находятся функции для рисования объектов
+с помощью pygame
+
+функции:
+    
+    draw_bodies(bodies: set, surf: pygame.Surface, frame: Frame, drawlines: bool):
+        рисует данное множество тел
+    draw_pseudobody(part_set: set, vx: float, vy: float, surf: pygame.Surface, frame: Frame):
+        рисует множество деталей и вектор скорости от одной из них
+"""
+
 def draw_bodies(bodies, surf, frame, drawlines = True):
+    """
+    рисует данное множество тел
+    
+    **bodies** - множество тел
+    **surf** - поверхность для рисования
+    **frame** - мировая система отсчёта в экранной
+    **drawlines** - рисовать ли линии от деталей к ЦМ
+    """
     for body in bodies:
         for part in body.part:
             if drawlines:
@@ -17,6 +37,16 @@ def draw_bodies(bodies, surf, frame, drawlines = True):
             pg.draw.lines (surf, "0x00D0D0", True, [(body_screen_x, body_screen_y + icon_size), (body_screen_x + icon_size, body_screen_y), (body_screen_x, body_screen_y - icon_size), (body_screen_x - icon_size, body_screen_y)])
             
 def draw_pseudobody(part_set, vx, vy, surf, frame):
+    """
+    рисует множество деталей и вектор скорости от одной из них.
+    для визуализации создаваемого тела перед добавлением
+    
+    **part_set** - множество деталей
+    **vx** - скорость по x
+    **vy** - скорость по y
+    **surf** - поверхность для рисования
+    **frame** - мировая система отсчёта в экранной
+    """
     for part in part_set:
         pg.draw.circle (surf, "0xD0D0D0", frame.direct((part.x, part.y)), round(part.r * frame.scale), 1)
     for part in part_set:
